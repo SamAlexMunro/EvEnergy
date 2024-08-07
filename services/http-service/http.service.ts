@@ -6,10 +6,18 @@ import { BehaviorSubject } from 'rxjs';
  * if working with a bespoke internal BE service that has specific needs and responses
  */
 export class HttpService {
-  error$ = new BehaviorSubject({ error: '' });
+  error$ = new BehaviorSubject('');
   loading$ = new BehaviorSubject(false);
 
-  async get() {}
+  async get<Type>({ url, configurationOptions }: { url: string; configurationOptions?: {} }): Promise<Type> {
+    this.loading$.next(true);
+    this.error$.next('');
+
+    return fetch(url, configurationOptions)
+      .then((response) => response.json())
+      .catch((error) => this.error$.next(error))
+      .finally(() => this.loading$.next(false));
+  }
 
   /**
    * Example methods if we are building out a fully fledged HTTPService
