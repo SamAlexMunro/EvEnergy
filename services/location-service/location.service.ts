@@ -3,8 +3,8 @@ import { BehaviorSubject } from 'rxjs';
 
 export class LocationService {
   static instance: LocationService;
-  error$ = new BehaviorSubject('');
-  locationData$ = new BehaviorSubject<Location.LocationObjectCoords>({
+  readonly error$ = new BehaviorSubject('');
+  readonly locationData$ = new BehaviorSubject<Location.LocationObjectCoords>({
     accuracy: 0,
     altitude: 0,
     altitudeAccuracy: 0,
@@ -14,6 +14,11 @@ export class LocationService {
     speed: 0,
   });
 
+  /**
+   * This is a good use case for a singleton service, as it will be used to for accessing
+   * data that essentially will always be the same regardless of when and what is consuming this
+   * service.
+   */
   static getInstance(): LocationService {
     return LocationService.instance ? this.instance : (LocationService.instance = new LocationService());
   }
@@ -25,7 +30,7 @@ export class LocationService {
   async requestLocationPermission(): Promise<void> {
     const { status } = await Location.requestForegroundPermissionsAsync();
 
-    if (status !== 'granted') {
+    if (status !== Location.PermissionStatus.GRANTED) {
       return this.error$.next('Permission to access location was denied');
     }
 
