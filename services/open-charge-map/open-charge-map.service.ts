@@ -1,141 +1,51 @@
 import { BehaviorSubject } from 'rxjs';
 import { HttpService } from '../http-service/http.service';
 
-interface DataProviderStatusType {
-  IsProviderEnabled: boolean;
-  ID: number;
-  Title: string;
-}
-
-interface DataProvider {
-  WebsiteURL: string;
-  Comments: string | null;
-  DataProviderStatusType: DataProviderStatusType;
-  IsRestrictedEdit: boolean;
-  IsOpenDataLicensed: boolean;
-  IsApprovedImport: boolean;
-  License: string;
-  DateLastImported: string | null;
-  ID: number;
-  Title: string;
-}
-
-interface OperatorInfo {
-  WebsiteURL: string;
-  Comments: string;
-  PhonePrimaryContact: string | null;
-  PhoneSecondaryContact: string | null;
-  IsPrivateIndividual: boolean;
-  AddressInfo: string | null;
-  BookingURL: string | null;
-  ContactEmail: string | null;
-  FaultReportEmail: string | null;
-  IsRestrictedEdit: boolean;
-  ID: number;
-  Title: string;
-}
-
-interface UsageType {
-  IsPayAtLocation: boolean;
-  IsMembershipRequired: boolean;
-  IsAccessKeyRequired: boolean;
-  ID: number;
-  Title: string;
-}
-
-interface StatusType {
-  IsOperational: boolean;
-  IsUserSelectable: boolean;
-  ID: number;
-  Title: string;
-}
-
-interface SubmissionStatus {
-  IsLive: boolean;
-  ID: number;
-  Title: string;
-}
-
-interface Country {
-  ISOCode: string;
-  ContinentCode: string;
-  ID: number;
-  Title: string;
-}
-
 interface AddressInfo {
   ID: number;
   Title: string;
   AddressLine1: string;
   AddressLine2: string | null;
   Town: string | null;
-  StateOrProvince: string;
+  StateOrProvince: string | null;
   Postcode: string;
   CountryID: number;
-  Country: Country;
+  Country: string | null;
   Latitude: number;
   Longitude: number;
-  ContactTelephone1: string | null;
+  ContactTelephone1: string;
   ContactTelephone2: string | null;
   ContactEmail: string | null;
   AccessComments: string | null;
-  RelatedURL: string | null;
+  RelatedURL: string;
   Distance: number | null;
   DistanceUnit: number;
-}
-
-interface ConnectionType {
-  FormalName: string;
-  IsDiscontinued: boolean;
-  IsObsolete: boolean;
-  ID: number;
-  Title: string;
-}
-
-interface StatusTypeConnection {
-  IsOperational: boolean;
-  IsUserSelectable: boolean;
-  ID: number;
-  Title: string;
-}
-
-interface Level {
-  Comments: string;
-  IsFastChargeCapable: boolean;
-  ID: number;
-  Title: string;
-}
-
-interface CurrentType {
-  Description: string;
-  ID: number;
-  Title: string;
 }
 
 interface Connection {
   ID: number;
   ConnectionTypeID: number;
-  ConnectionType: ConnectionType;
+  ConnectionType: string | null;
   Reference: string | null;
   StatusTypeID: number;
-  StatusType: StatusTypeConnection;
+  StatusType: string | null;
   LevelID: number;
-  Level: Level;
+  Level: string | null;
   Amps: number;
   Voltage: number;
   PowerKW: number;
-  CurrentTypeID: number;
-  CurrentType: CurrentType;
+  CurrentTypeID: number | null;
+  CurrentType: string | null;
   Quantity: number;
-  Comments: string;
+  Comments: string | null;
 }
 
 interface ChargePoint {
-  DataProvider: DataProvider;
-  OperatorInfo: OperatorInfo;
-  UsageType: UsageType;
-  StatusType: StatusType;
-  SubmissionStatus: SubmissionStatus;
+  DataProvider: string | null;
+  OperatorInfo: string | null;
+  UsageType: string | null;
+  StatusType: string | null;
+  SubmissionStatus: string | null;
   UserComments: string | null;
   PercentageSimilarity: number | null;
   MediaItems: string | null;
@@ -153,7 +63,7 @@ interface ChargePoint {
   AddressInfo: AddressInfo;
   Connections: Connection[];
   NumberOfPoints: number;
-  GeneralComments: string | null;
+  GeneralComments: string;
   DatePlanned: string | null;
   DateLastConfirmed: string | null;
   StatusTypeID: number;
@@ -176,9 +86,14 @@ export class OpenChargeMapService {
   error$: BehaviorSubject<string>;
 
   async retrievePoiList() {
-    const response = await this.httpService.get<ChargePoint[]>({
-      url: `https://api.openchargemap.io/v3/poi?key=${OPEN_CHARGE_MAP_API_KEY}`,
+    const params = new URLSearchParams({
+      compact: 'true',
     });
+
+    const response = await this.httpService.get<ChargePoint[]>({
+      url: `https://api.openchargemap.io/v3/poi?key=${OPEN_CHARGE_MAP_API_KEY}&${params.toString()}`,
+    });
+    console.log(response);
     if (!response) return;
     this.poiList$.next(response);
   }
